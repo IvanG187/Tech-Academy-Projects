@@ -1,0 +1,28 @@
+import sqlite3
+from datetime import datetime
+
+connection = sqlite3.connect("C:/Python27/PyStation/pydrill_database.db")
+c = connection.cursor()
+
+
+
+
+def enter_data(file_name, file_time, time_created):
+    "enters data from copyfile function into database"
+    c.execute("INSERT INTO Orders VALUES(?,?,?)",(file_name, file_time , time_created))
+    connection.commit()
+    print("file copy entered into database")
+
+def read_data():
+    """retrieves time_created data and converts to unix int"""
+    c.execute("SELECT MAX(runTime) AS lastUpdate FROM Orders")
+    row = c.fetchone() #grabs data
+    timeString = str(row) #converts data to string
+    timeString = timeString[1:11] #splices out integer from string
+    unixTime = int(timeString) #converts string back to integer
+    return datetime.fromtimestamp(unixTime).strftime('%m-%d-%Y at %H:%M %S')
+
+
+    
+    
+    
