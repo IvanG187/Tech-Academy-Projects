@@ -1,0 +1,55 @@
+import wx
+import os
+import py_drill1a
+import py_drill3
+import time
+
+class windowClass(wx.Frame):
+    def __init__(self, *args, **kwargs):
+        wx.Frame.__init__(self, None, -1, 'Order Center', size = (500, 300))
+
+        panel = wx.Panel(self, -1)
+
+        self.button = wx.Button(panel, -1, "Update the Orders", pos = (40, 20))
+        self.button2 = wx.Button(panel, -1, "View Orders", pos = (40, 50))
+        self.button3 = wx.Button(panel, -1, "Check Last Update", pos = (40, 80))
+        
+        self.Bind(wx.EVT_BUTTON, self.OnClick, self.button) #Binds Update Function to Update Button
+        self.Bind(wx.EVT_BUTTON, self.viewFolders, self.button2) #Binds View Function to View Button
+        self.Bind(wx.EVT_BUTTON, self.OnClick2, self.button3) #Binds Display Time Function to Check Last Update Button
+        
+        self.Show()    
+
+    def OnClick(self, event):
+        #Creates Event Object
+        self.updateOrders(self)
+
+    """def displayLastUpdate(self, e):
+        Time = self.displayLastUpdate(self)"""
+
+    def OnClick2(panel, event):
+        #Creates Event Object
+        time = py_drill3.read_data()
+        wx.StaticText(panel, -1, "The files were last updated on: "+time, (60,125))       
+
+    def viewFolders(self, e):
+        #Opens dialogue to view directory
+        wildcard = "All Files (*.*)|*.*" #filters for all file types
+        dialog = wx.FileDialog(None, "Choose a File", "C:/Python27/PyStation", " ", wildcard, wx.OPEN)
+        if dialog.ShowModal() == wx.ID_OK:
+            print(dialog.GetPath())
+        dialog.Destroy()
+    
+    def updateOrders(self, e):
+        #Updates the Orders when button is selected
+        folder = 'C:/Python27/PyStation/originalFolder/'
+        copySuccess = py_drill1a.copyFiles(folder)
+        print("Orders have been successfully updated.")
+        
+
+def main():
+    app = wx.App()
+    windowClass(None)
+    app.MainLoop()
+
+main()
