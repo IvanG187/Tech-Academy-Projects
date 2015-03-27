@@ -1,0 +1,48 @@
+import os
+import time
+import shutil
+import py_drill3
+"""import sqlite3
+
+connection = sqlite3.connect("/Python27/PyStation/pydrill_database.db")
+c = connection.cursor()"""
+
+folder = 'C:/Python27/PyStation/originalFolder/'
+def files_in_folder(d):
+    """creates a list of filenames in a given directory
+    returns list as variable dir_contents"""
+    dir_contents = os.listdir(d)
+    return dir_contents
+
+def fileDictionary(d):
+    """Creates a dictionary with keys of file names in a folder"""
+    dir_contents = files_in_folder(folder)
+    newDict = dict.fromkeys(dir_contents)
+    return newDict
+    
+def fileTime(d):
+    """gives last modified time as value to file name keys in dictionary"""
+    newDict = fileDictionary(d)
+    for key in newDict:
+        newDict[key] = os.path.getmtime(d + key) #assigns value of time modified in secs to filename
+    return newDict
+
+def copyFiles(d):
+    """Copies files created within past 24 hours"""
+    workingDict = fileTime(d)
+    x = time.time()
+    for key in workingDict:
+        if x - workingDict[key] < 86400:
+            shutil.copy2(d + key, 'C:/Python27/PyStation/copyFolder')
+            print("copied %s to copyFolder" % (key))
+            py_drill3.enter_data(key,workingDict[key], str(x))
+    return
+     # see module py_drill3
+
+
+            
+            
+    
+
+if __name__ == '__main__':
+    print("Running the Update Program")
