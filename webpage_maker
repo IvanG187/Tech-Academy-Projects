@@ -1,0 +1,121 @@
+import tkinter
+import webbrowser
+import sqlite3
+import sys
+
+#connection = sqlite3.connect("C:/Python34/PyVSDrill/HTML_database")
+#c = connection.cursor()
+#CREATE TABLE IF NOT EXISTS HTMLFiles('fileName' TEXT, 'content' TEXT)
+
+def main():
+
+    window = tkinter.Tk() #Creates window
+    window.title("Create a Custom Webpage!") #Gives GUI a title
+
+    canvas = tkinter.Canvas(window, width =500, height = 300) #Creates a canvas for the widget
+    canvas.pack()
+
+    entry = tkinter.StringVar() #Entry widget for name of file
+    name = tkinter.Entry(canvas, textvariable = entry)
+    name.insert('end','File Name')
+    #entryLabel = tkinter.Label(name, text = 'File Name')
+    #entryLabel.pack()
+    name.pack()
+
+    body = tkinter.Text(canvas, width = 25, height=10) #Text Entry Widget for content
+    body.pack(side = tkinter.LEFT)
+    body.insert('1.0', 'What would you like your webpage to say?')
+
+    def webpageMaker(text, pagename):
+        #Makes a webage displaying the given text value
+        filename = 'C:/Python34/PyVSDrill/'+pagename+'.html'
+        f = open(filename,'w')
+        message = "<!DOCTYPE html><html><head></head><body><p>%s</p></body></html>" % (text)
+        f.write(message)
+        f.close()
+        webbrowser.open_new_tab(filename)
+
+    def storeData(a,b):
+        #Enters data into database
+        data = (a,b)
+        with sqlite3.connect("C:/Python34/PyVSDrill/HTML_database.db") as connection:
+            c = connection.cursor()
+            c.execute("INSERT INTO HTMLFiles VALUES(?,?)", data) 
+            connection.commit()
+
+    def writeHandler():
+        #Event retrieves value of text string
+        content = body.get('1.0', 'end')
+        fileName = name.get()
+        webpageMaker(content, fileName)
+        storeData(fileName, content)
+
+    def findFiles():
+        #Queries database for file names
+            results = []
+            with sqlite3.connect("C:/Python34/PyVSDrill/HTML_database.db") as connection:
+                    c = connection.cursor()
+                    c.execute("SELECT * FROM HTMLFiles")
+                    while True:
+                            row = c.fetchone()
+                            if row is None:
+                                    break
+                            results.append(row)
+                    return results
+
+    def editHandler():
+        #Creates event for Edit Button
+        filenames = findFiles()
+        
+        new = tkinter.Toplevel(window)
+        new.title("Choose a Webpage to Edit")
+
+        editCanvas = tkinter.Canvas(new, width = 500, height = 300)
+        editCanvas.pack()
+        def onselect(evt):
+            w = evt.widget
+            index = int(w.curselection()[0])
+            value = w.get(index)
+
+            newpage = tkinter.Toplevel(new)
+            newpageCanvas = tkinter.Canvas(newpage, width =600, height =600)
+            newpageCanvas.pack()
+
+            newpageentry = tkinter.StringVar() #Entry widget for name of file
+            newpagename = tkinter.Entry(newpageCanvas, textvariable = entry)
+            newpagename.insert('end',value[0])
+            newpagename.pack()
+
+            newpagebody = tkinter.Text(newpageCanvas, width = 25, height=10) #Text Entry Widget for content
+            newpagebody.pack(side = tkinter.LEFT)
+            newpagebody.insert('1.0', value[1])
+            newpagebody.pack()
+
+            newpagebutton = tkinter.Button(newpageCanvas, text = 'Edit Page', command = writeHandler)
+            newpagebutton.pack()
+            
+            
+        lb = tkinter.Listbox(editCanvas, height = 10)
+        for i in filenames:
+            x = 1
+            lb.insert(x,i)
+            x += 1
+        lb.pack()
+        lb.bind('<<ListboxSelect>>', onselect)
+
+        
+        #chooseButton = tkinter.Button(new, text = 'Select Page', command = '<<ListboxSelect>>')
+        #chooseButton.pack()
+        
+    writeButton = tkinter.Button(window, text = "Create Webpage", command = writeHandler)
+    #creates button for write event
+    writeButton.pack()
+
+    editButton = tkinter.Button(window, text='Edit Pages', command = editHandler)
+    editButton.pack()
+
+    tkinter.mainloop() #Tells Python to expect events
+
+
+if __name__ == "__main__":
+    main()
